@@ -10,11 +10,14 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "FailsafePHP\\": "tests"
+            "FailsafePHP\\": ["tests/unit", "tests/helpers"]
         }
     },
-    "require": {},
+    "require": {
+        "php": ">7.4"
+    },
     "require-dev": {
-        "phpunit/phpunit": "^9.2"
+        "phpunit/phpunit": "^9.2",
+        "mockery/mockery": "^1.4"
     }
 }

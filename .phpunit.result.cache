@@ -1,0 +1,1 @@
+C:37:"PHPUnit\Runner\DefaultTestResultCache":269:{a:2:{s:7:"defects";a:2:{s:42:"FailsafePHP\FailsafeTest::testSimplePolicy";i:4;s:43:"FailsafePHP\FailsafeTest::testSimplePolicy2";i:4;}s:5:"times";a:2:{s:42:"FailsafePHP\FailsafeTest::testSimplePolicy";d:0.01;s:43:"FailsafePHP\FailsafeTest::testSimplePolicy2";d:0.046;}}}
