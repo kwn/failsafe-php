@@ -6,20 +6,25 @@ namespace FailsafePHP;
 
 class RetryPolicy
 {
-    private array $handle;
-    private Duration $duration;
+    private array $throwables;
+    private Duration $delay;
     private int $maxRetries;
 
     public function handle(string ...$throwables): self
     {
-        $this->handle = $throwables;
+        $this->throwables = $throwables;
 
         return $this;
     }
 
+    public function handles(\Throwable $e): bool
+    {
+        return in_array(get_class($e), $this->throwables, true);
+    }
+
     public function withDelay(Duration $duration): self
     {
-        $this->duration = $duration;
+        $this->delay = $duration;
 
         return $this;
     }
@@ -31,8 +36,18 @@ class RetryPolicy
         return $this;
     }
 
-    public function handles(\Throwable $e): bool
+    public function getThrowables(): array
     {
-        return in_array(get_class($e), $this->handle, true);
+        return $this->throwables;
+    }
+
+    public function getMaxRetries(): int
+    {
+        return $this->maxRetries;
+    }
+
+    public function getDelay(): Duration
+    {
+        return $this->delay;
     }
 }

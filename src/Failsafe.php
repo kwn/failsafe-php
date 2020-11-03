@@ -6,7 +6,7 @@ namespace FailsafePHP;
 
 class Failsafe
 {
-    private RetryPolicy $retryPolicy;
+    private RetryPolicyExecutor $retryPolicyExecutor;
 
     private function __construct()
     {
@@ -15,20 +15,17 @@ class Failsafe
     public static function with(RetryPolicy $retryPolicy): self
     {
         $failsafe = new self();
-        $failsafe->retryPolicy = $retryPolicy;
+        $failsafe->retryPolicyExecutor = new RetryPolicyExecutor($retryPolicy);
 
         return $failsafe;
     }
 
+    /**
+     * @throws \Throwable
+     */
     public function run(callable $function): void
     {
-        try {
-            $function();
-        } catch (\Throwable $e) {
-            if ($this->retryPolicy->handles($e)) {
-
-            }
-        }
+        $this->retryPolicyExecutor->attempt($function);
     }
 
     public function get(callable $function)

@@ -4,34 +4,48 @@ declare(strict_types=1);
 
 namespace FailsafePHP;
 
+use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use PHPUnit\Framework\TestCase;
 
 class FailsafeTest extends TestCase
 {
-    public function testSimplePolicy(): void
+    use MockeryPHPUnitIntegration;
+
+    public function testAfterMaxRetriesExceptionIsThrown(): void
     {
+        $this->expectException(ConnectionException::class);
+
         $retryPolicy = (new RetryPolicy())
-            ->handle(\DomainException::class, \RuntimeException::class)
-            ->withDelay(Duration::ofSeconds(2))
+            ->handle(ConnectionException::class)
             ->withMaxReties(3);
 
-        $foo = new Foo();
+        $foo = \Mockery::spy();
+        $foo->shouldReceive('connect')->andThrow(ConnectionException::class)->byDefault();
 
         Failsafe::with($retryPolicy)->run(fn() => $foo->connect());
     }
 
-    public function testSimplePolicy2(): void
+    public function testMaxRetries(): void
     {
         $retryPolicy = (new RetryPolicy())
-            ->handle(\DomainException::class)
-            ->withDelay(Duration::ofSeconds(2))
+            ->handle(ConnectionException::class)
             ->withMaxReties(3);
 
-        $foo = \Mockery::spy(Foo::class);
-        $foo->shouldReceive('connect')->andThrow(\DomainException::class)->byDefault();
+        $foo = \Mockery::spy();
+        $foo->shouldReceive('connect')->andReturnUsing(function () {
+            static $counter = 0;
+            switch ($counter++) {
+                case 0:
+                case 1:
+                case 2:
+                    throw new ConnectionException('Error');
+                default:
+                    return true;
+            }
+        });
 
         Failsafe::with($retryPolicy)->run(fn() => $foo->connect());
 
-        $foo->shouldHaveReceived('connect')->times(3);
+        $foo->shouldHaveReceived('connect')->times(4);
     }
 }
